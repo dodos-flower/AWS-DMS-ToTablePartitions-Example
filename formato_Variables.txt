@@ -1,0 +1,14 @@
+usuario_aws = "AKIAEXAMPLE"          # AWS Access Key ID
+region_aws = "us-east-1"             # Región AWS (e.g., us-east-1, eu-west-1)
+vpc_id = "vpc-0a1b2c3d4e5f6g7h8"     # ID de la VPC donde estará el servicio DMS
+subnets_ids = [                      # Lista de subnets en la VPC
+  "subnet-12345678",
+  "subnet-87654321"
+]
+nombre_base_app = "my-dms-project"   # Nombre base para los recursos
+role_deploy = "arn:aws:iam::123456789012:role/terraform-deploy-role"  # ARN del rol para despliegue
+database_name = "my_database"        # Nombre de la base de datos
+database_port = 5432                 # Puerto de la base de datos (por defecto para PostgreSQL)
+database_host = "my-db-instance.abc123.us-east-1.rds.amazonaws.com"  # Endpoint del host de la base de datos
+database_user = "db_user"            # Usuario de la base de datos
+database_user_pass = "secure_pass"   # Contraseña del usuario

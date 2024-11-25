@@ -1,0 +1,60 @@
+name: Deploy DMS with Terraform
+
+on:
+  push:
+    branches:
+      - main # Despliega automáticamente en la rama principal
+  pull_request:
+    branches:
+      - main # Revisa cambios en PR hacia la rama principal
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  NOMBRE_BASE_APP: ${{ secrets.NOMBRE_BASE_APP }}
+
+jobs:
+  terraform:
+    name: Deploy Terraform
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.6.0
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        role-to-assume: ${{ secrets.ROLE_DEPLOY }}
+        role-session-name: "github-actions-session"
+        region: ${{ secrets.AWS_REGION }}
+
+    - name: Terraform Init
+      run: terraform init
+      env:
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    - name: Terraform Validate
+      run: terraform validate
+
+    - name: Terraform Plan
+      run: terraform plan -out=tfplan \
+        -var "database_name=${{ secrets.DATABASE_NAME }}" \
+        -var "database_port=${{ secrets.DATABASE_PORT }}" \
+        -var "database_host=${{ secrets.DATABASE_HOST }}" \
+        -var "database_user=${{ secrets.DATABASE_USER }}" \
+        -var "database_user_pass=${{ secrets.DATABASE_USER_PASS }}"
+      env:
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main' # Solo aplica cambios si está en la rama principal
+      run: terraform apply -auto-approve tfplan
+      env:
+        AWS_REGION: ${{ secrets.AWS_REGION }}
